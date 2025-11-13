@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة اختبار المهارات - النسخة النهائية</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* ========== Design System Variables ========== */
+        :root {
+            --primary: #0ea5e9;
+            --primary-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            --success: #10b981;
+            --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --danger: #ef4444;
+            --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0c4a6e 0%, #082f49 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            color: var(--dark);
+            background-attachment: fixed;
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: var(--shadow-xl);
+            width: 100%;
+            max-width: 1000px;
+            min-height: 650px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ========== Welcome Screen (تظهر مباشرة) ========== */
+        .welcome-screen {
+            padding: 3rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0c4a6e 100%);
+            color: white;
+            min-height: 650px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .welcome-header {
+            margin-bottom: 3rem;
+        }
+
+        .welcome-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .welcome-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .exam-stats {
+            background: rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            margin-top: 2rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        /* ========== Exam Screen ========== */
+        .exam-screen {
+            display: none;
+        }
+
+        .exam-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .exam-info {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .question-progress {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .timer-box {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .timer-box.warning {
+            background: var(--warning);
+            animation: pulse 1s infinite;
+        }
+
+        .timer-box.danger {
+            background: var(--danger);
+            animation: pulse 0.5s infinite;
+        }
+
+        .question-container {
+            padding: 2rem;
+            min-height: 450px;
+        }
+
+        .question-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .question-card:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+        }
+
+        .question-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-number {
+            background: var(--primary-gradient);
+            color: white;
+            min-width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 600;
+            line-height: 1.6;
+            color: var(--dark);
+        }
+
+        .options-container {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option-wrapper {
+            position: relative;
+        }
+
+        .option-input {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 1.25rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+            font-size: 1.1rem;
+        }
+
+        .option-label:hover {
+            border-color: var(--primary);
+            background: #f0f9ff;
+        }
+
+        .option-input:checked + .option-label {
+            border-color: var(--primary);
+            background: #eff6ff;
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+        }
+
+        .option-input:checked + .option-label::after {
+            content: '✓';
+            margin-right: auto;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .option-letter {
+            font-weight: 700;
+            color: var(--primary);
+            margin-left: 1rem;
+            min-width: 24px;
+        }
+
+        /* ========== Navigation ========== */
+        .nav-container {
+            padding: 1.5rem 2rem;
+            background: var(--light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .question-nav-grid {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            max-width: 500px;
+        }
+
+        .nav-btn {
+            width: 45px;
+            height: 45px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--primary);
+            background: #f0f9ff;
+        }
+
+        .nav-btn.answered {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .nav-btn.current {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: scale(1.15);
+        }
+
+        .nav-btn.review {
+            background: var(--warning);
+            color: white;
+            border-color: var(--warning);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 2px solid var(--border);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            background: #f0f9ff;
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            color: white;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* ========== Results Screen ========== */
+        .results-screen {
+            display: none;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .score-circle {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: var(--success-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            color: white;
+            font-size: 3.5rem;
+            font-weight: 800;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+        }
+
+        /* ... (استمرار الأنماط) ... */
+
+        /* ========== Responsive ========== */
+        @media (max-width: 768px) {
+            .welcome-title {
+                font-size: 2rem;
+            }
+
+            .exam-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .question-card {
+                padding: 1.5rem;
+            }
+
+            .question-text {
+                font-size: 1.2rem;
+            }
+
+            .nav-container {
+                flex-direction: column;
+            }
+
+            .question-nav-grid {
+                order: 2;
+                justify-content: center;
+            }
+
+            .score-circle {
+                width: 180px;
+                height: 180px;
+                font-size: 2.5rem;
+            }
+        }
+
+        /* ========== Utility Classes ========== */
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <!-- ✅ تم حذف شاشة Loader تماماً -->
+
+    <!-- Welcome Screen (تظهر مباشرة عند فتح الموقع) -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-header">
+            <h1 class="welcome-title">🎯 منصة اختبار المهارات</h1>
+            <p class="welcome-subtitle">اختبار تقييم شامل لقياس مستواك المعرفي</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🔄</span>
+                <div class="feature-title">أسئلة ذكية</div>
+                <p>لا تتكرر أبداً، تتغير في كل محاولة</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">⏱️</span>
+                <div class="feature-title">مؤقت دقيق</div>
+                <p>مع تحذيرات ذكية وقت الضغط</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">📊</span>
+                <div class="feature-title">تحليل أداء</div>
+                <p>رسوم بيانية وتفاصيل دقيقة</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">📜</span>
+                <div class="feature-title">شهادة معتمدة</div>
+                <p>PDF قابل للتحميل والمشاركة</p>
+            </div>
+        </div>
+
+        <div class="exam-stats">
+            <div class="stat-item">
+                <div class="stat-value">10</div>
+                <div class="stat-label">سؤال</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">10</div>
+                <div class="stat-label">دقيقة</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">70%</div>
+                <div class="stat-label">نسبة النجاح</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">∞</div>
+                <div class="stat-label">محاولات غير محدودة</div>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="startExam()">
+            🚀 ابدأ الاختبار الآن
+        </button>
+    </div>
+
+    <!-- Exam Screen -->
+    <div class="exam-screen" id="examScreen">
+        <div class="exam-header">
+            <div class="exam-info">
+                <div class="question-progress" id="questionProgress">السؤال 1 من 10</div>
+            </div>
+            <div class="timer-box" id="timerBox">
+                <span>⏱️</span>
+                <span id="timerText">10:00</span>
+            </div>
+        </div>
+
+        <div class="question-container" id="questionContainer"></div>
+
+        <div class="nav-container" id="navContainer">
+            <div class="question-nav-grid" id="questionNavGrid"></div>
+            <div class="action-buttons">
+                <button class="btn btn-secondary" id="prevBtn" onclick="navigateQuestion(-1)">
+                    ⬅️ السابق
+                </button>
+                <button class="btn btn-secondary" onclick="markForReview()">
+                    🚩 علامة للمراجعة
+                </button>
+                <button class="btn btn-success hidden" id="finishBtn" onclick="finishExam()">
+                    ✅ إنهاء الاختبار
+                </button>
+                <button class="btn btn-primary" id="nextBtn" onclick="navigateQuestion(1)">
+                    التالي ➡️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div class="results-screen" id="resultsScreen">
+        <div class="results-header">
+            <h1 id="resultTitle">🎉 تهانينا!</h1>
+            <p id="resultSubtitle">لقد أكملت الاختبار بنجاح</p>
+            <div class="score-circle" id="scoreCircle">85%</div>
+        </div>
+
+        <div class="results-grid">
+            <div class="result-card">
+                <h3>النتيجة النهائية</h3>
+                <div class="value" id="finalScore">8.5 / 10</div>
+            </div>
+            <div class="result-card">
+                <h3>النسبة المئوية</h3>
+                <div class="value" id="percentage">85%</div>
+            </div>
+            <div class="result-card">
+                <h3>الوقت المستغرق</h3>
+                <div class="value" id="timeTaken">08:32</div>
+            </div>
+            <div class="result-card">
+                <h3>الحالة</h3>
+                <div class="value" id="examStatus">✅ ناجح</div>
+            </div>
+            <div class="result-card">
+                <h3>السرعة</h3>
+                <div class="value" id="speed">51 ث/سؤال</div>
+            </div>
+            <div class="result-card">
+                <h3>الدقة</h3>
+                <div class="value" id="accuracy">85%</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3 style="margin-bottom: 1rem; color: var(--primary);">📊 تحليل الأداء</h3>
+            <canvas id="performanceChart" width="400" height="200"></canvas>
+        </div>
+
+        <div class="review-section">
+            <h2>📝 مراجعة الإجابات</h2>
+            <div id="reviewContent"></div>
+        </div>
+
+        <div class="actions-bar">
+            <button class="btn-download" onclick="downloadCertificate()">
+                📥 تحميل الشهادة (PDF)
+            </button>
+            <button class="btn-download" onclick="shareResult()">
+                📤 مشاركة النتيجة
+            </button>
+            <button class="btn-download" onclick="restartExam()">
+                🔄 اختبار جديد
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ========== Professional Exam Data ==========
+        const professionalQuestions = [
+            {
+                text: "ما هي أهم مهارة يجب أن يمتلكها المطور في 2024؟",
+                options: ["إتقان لغة واحدة", "التعلم المستمر", "سرعة الكتابة", "حفظ الكود"],
+                correct: 1,
+                category: "تطوير مهني",
+                difficulty: "متوسط"
+            },
+            {
+                text: "ما هو أفضل نهج لحماية البيانات الحساسة؟",
+                options: ["تشفير فقط", "عدم التخزين", "security layers", "جدران الحماية"],
+                correct: 2,
+                category: "الأمان",
+                difficulty: "صعب"
+            },
+            {
+                text: "ما هو مبدأ الـ 'DRY'؟",
+                options: ["Do Repeat Yourself", "Don't Repeat Yourself", "Do Review Yourself", "Don't Review Yourself"],
+                correct: 1,
+                category: "مبادئ البرمجة",
+                difficulty: "متوسط"
+            },
+            {
+                text: "ما الفرق بين Responsive وAdaptive Design؟",
+                options: ["لا فرق", "Responsive مرن، Adaptive ثابت", "Responsive أسرع", "Adaptive للموبايل فقط"],
+                correct: 1,
+                category: "تصميم الويب",
+                difficulty: "متوسط"
+            },
+            {
+                text: "ما معنى 'Technical Debt'؟",
+                options: ["ديون مالية", "تنازل عن الجودة للسرعة", "تكلفة الأجهزة", "وقت التدريب"],
+                correct: 1,
+                category: "إدارة المشاريع",
+                difficulty: "متوسط"
+            },
+            {
+                text: "متى تُجرى اختبارات الأداء؟",
+                options: ["بعد النشر", "أثناء الكتابة فقط", "مستمر خلال التطوير", "عند شكاوى العملاء"],
+                correct: 2,
+                category: "جودة البرمجيات",
+                difficulty: "صعب"
+            },
+            {
+                text: "ما الغرض من Git؟",
+                options: ["زيادة السرعة", "تتبع التغييرات والتعاون", "تقليل الحجم", "تشفير الكود"],
+                correct: 1,
+                category: "أدوات التطوير",
+                difficulty: "سهل"
+            },
+            {
+                text: "ما هدف Code Review؟",
+                options: ["إيجاد أخطاء فقط", "مشاركة المعرفة", "إظهار الخبرة", "إضافة ميزات"],
+                correct: 1,
+                category: "ممارسات الفريق",
+                difficulty: "سهل"
+            },
+            {
+                text: "ما أهم عامل لبناء فريق ناجح؟",
+                options: ["مطورون senior فقط", "التواصل والثقة", "ساعات عمل طويلة", "أحدث التقنيات"],
+                correct: 1,
+                category: "القيادة",
+                difficulty: "سهل"
+            },
+            {
+                text: "ما أفضل ممارسة لكود قابل للصيانة؟",
+                options: ["أقل عدد أسطر", "تعليقات توضيحية", "أسماء x,y,z", "ملف واحد"],
+                correct: 1,
+                category: "جودة الكود",
+                difficulty: "سهل"
+            }
+        ];
+
+        // ========== Exam Manager Class ==========
+        class ProfessionalExamManager {
+            constructor() {
+                this.questions = professionalQuestions;
+                this.currentIndex = 0;
+                this.answers = new Array(this.questions.length).fill(null);
+                this.reviewFlags = new Array(this.questions.length).fill(false);
+                this.startTime = null;
+                this.endTime = null;
+                this.timeLimit = 600;
+                this.timeRemaining = this.timeLimit;
+                this.timer = null;
+                this.attemptId = this.generateUUID();
+                this.questionTimes = [];
+            }
+
+            generateUUID() {
+                return 'exam_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            start() {
+                this.startTime = Date.now();
+                this.startTimer();
+                this.renderQuestion();
+                this.updateNavigation();
+                this.setupFocusMode();
+            }
+
+            startTimer() {
+                this.timer = setInterval(() => {
+                    this.timeRemaining--;
+                    this.updateTimerDisplay();
+
+                    if (this.timeRemaining <= 0) {
+                        this.finish();
+                    }
+                }, 1000);
+            }
+
+            updateTimerDisplay() {
+                const minutes = Math.floor(this.timeRemaining / 60);
+                const seconds = this.timeRemaining % 60;
+                const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                document.getElementById('timerText').textContent = display;
+                const timerBox = document.getElementById('timerBox');
+
+                if (this.timeRemaining <= 60) {
+                    timerBox.className = 'timer-box danger';
+                } else if (this.timeRemaining <= 300) {
+                    timerBox.className = 'timer-box warning';
+                }
+            }
+
+            renderQuestion() {
+                const container = document.getElementById('questionContainer');
+                const question = this.questions[this.currentIndex];
+                
+                if (!this.questionTimes[this.currentIndex]) {
+                    this.questionTimes[this.currentIndex] = { start: Date.now(), end: null };
+                } else {
+                    this.questionTimes[this.currentIndex].start = Date.now();
+                }
+
+                container.innerHTML = `
+                    <div class="question-card fade-in">
+                        <div class="question-header">
+                            <div class="question-number">${this.currentIndex + 1}</div>
+                            <div>
+                                <div class="question-text">${question.text}</div>
+                                <div style="margin-top: 0.5rem; display: flex; gap: 1rem; font-size: 0.9rem; color: #64748b;">
+                                    <span>📂 ${question.category}</span>
+                                    <span>📊 ${question.difficulty}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="options-container">
+                            ${question.options.map((option, i) => `
+                                <div class="option-wrapper">
+                                    <input type="radio" 
+                                           id="q${this.currentIndex}_opt${i}" 
+                                           name="q${this.currentIndex}" 
+                                           value="${i}" 
+                                           class="option-input"
+                                           ${this.answers[this.currentIndex] === i ? 'checked' : ''}
+                                           onchange="examManager.saveAnswer(${i})">
+                                    <label for="q${this.currentIndex}_opt${i}" class="option-label">
+                                        <span class="option-letter">${String.fromCharCode(65 + i)}.</span>
+                                        ${option}
+                                    </label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                this.updateProgress();
+            }
+
+            saveAnswer(answerIndex) {
+                this.answers[this.currentIndex] = answerIndex;
+                
+                if (this.questionTimes[this.currentIndex]) {
+                    this.questionTimes[this.currentIndex].end = Date.now();
+                }
+
+                this.updateNavigation();
+                
+                setTimeout(() => {
+                    if (this.currentIndex < this.questions.length - 1) {
+                        this.navigate(1);
+                    }
+                }, 1000);
+            }
+
+            navigate(direction) {
+                const newIndex = this.currentIndex + direction;
+                if (newIndex >= 0 && newIndex < this.questions.length) {
+                    this.currentIndex = newIndex;
+                    this.renderQuestion();
+                    this.updateNavigation();
+                }
+            }
+
+            goToQuestion(index) {
+                this.currentIndex = index;
+                this.renderQuestion();
+                this.updateNavigation();
+            }
+
+            markForReview() {
+                this.reviewFlags[this.currentIndex] = !this.reviewFlags[this.currentIndex];
+                this.updateNavigation();
+            }
+
+            updateNavigation() {
+                document.getElementById('questionProgress').textContent = 
+                    `السؤال ${this.currentIndex + 1} من ${this.questions.length}`;
+
+                document.getElementById('prevBtn').style.visibility = 
+                    this.currentIndex === 0 ? 'hidden' : 'visible';
+                
+                const isLast = this.currentIndex === this.questions.length - 1;
+                document.getElementById('nextBtn').classList.toggle('hidden', isLast);
+                document.getElementById('finishBtn').classList.toggle('hidden', !isLast);
+
+                const grid = document.getElementById('questionNavGrid');
+                grid.innerHTML = this.questions.map((_, i) => {
+                    const classes = ['nav-btn'];
+                    if (this.answers[i] !== null) classes.push('answered');
+                    if (this.reviewFlags[i]) classes.push('review');
+                    if (i === this.currentIndex) classes.push('current');
+                    
+                    return `
+                        <button class="${classes.join(' ')}" onclick="examManager.goToQuestion(${i})" title="السؤال ${i + 1}">
+                            ${i + 1}
+                        </button>
+                    `;
+                }).join('');
+            }
+
+            updateProgress() {
+                const progress = ((this.currentIndex + 1) / this.questions.length) * 100;
+                document.getElementById('progressBarFill').style.width = progress + '%';
+            }
+
+            setupFocusMode() {
+                document.addEventListener('visibilitychange', () => {
+                    if (examManager && !examManager.endTime && document.hidden) {
+                        console.warn('⚠️ محاولة تبديل التبويب - تم تسجيلها');
+                    }
+                });
+            }
+
+            calculateResults() {
+                let correct = 0;
+                let totalTime = 0;
+                const categoryStats = {};
+                const difficultyStats = {};
+
+                this.questions.forEach((q, i) => {
+                    if (this.questionTimes[i] && this.questionTimes[i].end) {
+                        const time = (this.questionTimes[i].end - this.questionTimes[i].start) / 1000;
+                        totalTime += time;
+                    }
+
+                    if (this.answers[i] === q.correct) {
+                        correct++;
+                    }
+
+                    categoryStats[q.category] = (categoryStats[q.category] || 0) + 1;
+                    difficultyStats[q.difficulty] = (difficultyStats[q.difficulty] || 0) + 1;
+                });
+
+                const percentage = Math.round((correct / this.questions.length) * 100);
+                const avgTime = totalTime / this.questions.length;
+                const passed = percentage >= 70;
+
+                return {
+                    correct,
+                    total: this.questions.length,
+                    percentage,
+                    passed,
+                    totalTime,
+                    avgTime: Math.round(avgTime),
+                    categoryStats,
+                    difficultyStats,
+                    perQuestion: this.questionTimes.map((qt, i) => ({
+                        time: qt && qt.end ? Math.round((qt.end - qt.start) / 1000) : 0,
+                        correct: this.answers[i] === this.questions[i].correct,
+                        category: this.questions[i].category
+                    }))
+                };
+            }
+
+            finish() {
+                clearInterval(this.timer);
+                this.endTime = Date.now();
+
+                const results = this.calculateResults();
+                this.sendAnalytics(results);
+                this.showResults(results);
+            }
+
+            sendAnalytics(results) {
+                const payload = {
+                    attemptId: this.attemptId,
+                    timestamp: new Date().toISOString(),
+                    results: results,
+                    device: navigator.userAgent,
+                    language: navigator.language
+                };
+                
+                console.log('📊 Analytics Data:', payload);
+                localStorage.setItem('analytics_' + this.attemptId, JSON.stringify(payload));
+            }
+
+            showResults(results) {
+                document.getElementById('examScreen').style.display = 'none';
+                
+                document.getElementById('resultsScreen').style.display = 'block';
+                document.getElementById('resultsScreen').classList.add('fade-in');
+
+                const scoreCircle = document.getElementById('scoreCircle');
+                scoreCircle.textContent = results.percentage + '%';
+                scoreCircle.style.background = results.percentage >= 70 ? 
+                    'var(--success-gradient)' : 'var(--danger-gradient)';
+
+                document.getElementById('finalScore').textContent = `${results.correct} / ${results.total}`;
+                document.getElementById('percentage').textContent = results.percentage + '%';
+                
+                const minutes = Math.floor(results.totalTime / 60);
+                const seconds = results.totalTime % 60;
+                document.getElementById('timeTaken').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                document.getElementById('examStatus').textContent = results.passed ? '✅ ناجح' : '❌ لم يجتز';
+                document.getElementById('examStatus').style.color = results.passed ? '#10b981' : '#ef4444';
+                
+                document.getElementById('speed').textContent = `${results.avgTime} ث/سؤال`;
+                document.getElementById('accuracy').textContent = results.percentage + '%';
+
+                this.renderChart(results);
+                this.renderReview(results);
+            }
+
+            renderChart(results) {
+                const ctx = document.getElementById('performanceChart').getContext('2d');
+                
+                const labels = Object.keys(results.categoryStats);
+                const data = labels.map(label => {
+                    const questionsInCategory = results.perQuestion.filter((_, i) => 
+                        this.questions[i].category === label
+                    );
+                    const indices = results.perQuestion.map((_, i) => i).filter(i => 
+                        this.questions[i].category === label
+                    );
+                    const correctInCategory = indices.filter(i => 
+                        this.answers[i] === this.questions[i].correct
+                    ).length;
+                    return Math.round((correctInCategory / questionsInCategory.length) * 100);
+                });
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'نسبة النجاح حسب الفئة (%)',
+                            data: data,
+                            backgroundColor: 'rgba(14, 165, 233, 0.6)',
+                            borderColor: 'rgba(14, 165, 233, 1)',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            renderReview(results) {
+                const container = document.getElementById('reviewContent');
+                container.innerHTML = this.questions.map((q, i) => {
+                    const userAnswer = this.answers[i];
+                    const isCorrect = userAnswer === q.correct;
+                    const status = userAnswer === null ? 'skipped' : (isCorrect ? 'correct' : 'incorrect');
+                    const statusText = userAnswer === null ? '⏭️ تم التخطي' : 
+                                     (isCorrect ? '✅ صحيح' : '❌ خاطئ');
+                    
+                    return `
+                        <div class="review-item ${status}">
+                            <div class="review-question">
+                                ${i + 1}. ${q.text} 
+                                <span style="float: left; font-size: 0.9rem; color: #64748b;">
+                                    (${results.perQuestion[i]?.time || 0} ثانية)
+                                </span>
+                            </div>
+                            <div class="review-answers">
+                                <div class="answer-line correct">
+                                    ✅ الإجابة الصحيحة: ${q.options[q.correct]}
+                                </div>
+                                ${userAnswer !== null ? 
+                                    `<div class="answer-line user-answer">
+                                        ${isCorrect ? '✅' : '❌'} إجابتك: ${q.options[userAnswer]}
+                                    </div>` : 
+                                    '<div class="answer-line user-answer">⏭️ لم تجب</div>'
+                                }
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // ========== Global Functions ==========
+        let examManager;
+
+        function startExam() {
+            // ✅ الإصلاح: لا يوجد loader بعد الآن - انتقال فوري
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('examScreen').style.display = 'block';
+            
+            examManager = new ProfessionalExamManager();
+            examManager.start();
+        }
+
+        function navigateQuestion(direction) {
+            examManager.navigate(direction);
+        }
+
+        function goToQuestion(index) {
+            examManager.goToQuestion(index);
+        }
+
+        function markForReview() {
+            examManager.markForReview();
+        }
+
+        function finishExam() {
+            if (confirm('⚠️ هل أنت متأكد من إنهاء الاختبار؟')) {
+                examManager.finish();
+            }
+        }
+
+        function downloadCertificate() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            pdf.setFontSize(20);
+            pdf.setTextColor(14, 165, 233);
+            pdf.text('شهادة اجتياز الاختبار', 105, 40, { align: 'center' });
+            
+            pdf.setFontSize(16);
+            pdf.setTextColor(0, 0, 0);
+            pdf.text(`رقم المحاولة: ${examManager.attemptId}`, 105, 60, { align: 'center' });
+            
+            const date = new Date().toLocaleDateString('ar-SA');
+            pdf.text(`التاريخ: ${date}`, 105, 70, { align: 'center' });
+            
+            const results = examManager.calculateResults();
+            pdf.text(`النتيجة: ${results.correct}/${results.total} (${results.percentage}%)`, 105, 85, { align: 'center' });
+            
+            pdf.setFontSize(14);
+            pdf.text('تم إنشاء هذه الشهادة إلكترونياً', 105, 250, { align: 'center' });
+            
+            pdf.save(`certificate_${examManager.attemptId}.pdf`);
+        }
+
+        function shareResult() {
+            const results = examManager.calculateResults();
+            const text = `لقد حصلت على ${results.percentage}% في اختبار المهارات! 🎯`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'نتيجة الاختبار',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(text + ' ' + window.location.href);
+                alert('تم نسخ النتيجة إلى الحافظة!');
+            }
+        }
+
+        function restartExam() {
+            if (confirm('هل تريد بدء اختبار جديد؟')) {
+                location.reload();
+            }
+        }
+
+        // ========== Keyboard Shortcuts ==========
+        document.addEventListener('keydown', (e) => {
+            if (!examManager || examManager.endTime) return;
+
+            switch(e.key) {
+                case 'ArrowLeft':
+                    navigateQuestion(-1);
+                    break;
+                case 'ArrowRight':
+                    if (examManager.currentIndex === examManager.questions.length - 1) {
+                        finishExam();
+                    } else {
+                        navigateQuestion(1);
+                    }
+                    break;
+                case '1': case '2': case '3': case '4':
+                    const optionIndex = parseInt(e.key) - 1;
+                    const radio = document.querySelector(`#q${examManager.currentIndex}_opt${optionIndex}`);
+                    if (radio) {
+                        radio.checked = true;
+                        examManager.saveAnswer(optionIndex);
+                    }
+                    break;
+                case 'r':
+                    markForReview();
+                    break;
+                case 'Escape':
+                    if (confirm('هل تريد إنهاء الاختبار؟')) {
+                        finishExam();
+                    }
+                    break;
+            }
+        });
+
+        // ========== Prevent Tab Switching ==========
+        document.addEventListener('visibilitychange', () => {
+            if (examManager && !examManager.endTime && document.hidden) {
+                console.warn('⚠️ محاولة تبديل التبويب - تم تسجيلها');
+            }
+        });
+    </script>
+</body>
+</html>
